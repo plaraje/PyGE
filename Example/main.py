@@ -1,9 +1,12 @@
 from Objects import Game
+from Example.Scenes.MainMenuScene import MainMenuScene
 from Example.Scenes.GameScene import GameScene
 
 def run_example():
     game = Game()
-    game.set_scene(GameScene(game))
+    menu = MainMenuScene(game)
+    games = GameScene(game)
+    game.set_scene(menu)
     game.run()
 
 if __name__ == "__main__":

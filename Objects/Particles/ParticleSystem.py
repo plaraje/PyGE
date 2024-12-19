@@ -9,13 +9,14 @@ class ParticleSystem:
         self.particle_properties = particle_properties
         self.particles = []
         self.time_since_last_spawn = 0
+        self.enabled = True
 
     def update(self, delta_time):
         self.time_since_last_spawn += delta_time
 
         # Generar nuevas partículas
         while self.time_since_last_spawn >= 1 / self.spawn_rate:
-            if len(self.particles) < self.max_particles:
+            if len(self.particles) < self.max_particles and self.enabled:
                 properties = self.particle_properties()
                 self.particles.append(Particle(properties))
             self.time_since_last_spawn -= 1 / self.spawn_rate
@@ -25,6 +26,7 @@ class ParticleSystem:
             particle.update(delta_time)
             if particle.dead:
                 self.particles.remove(particle)
+                del particle
 
     def render(self, render_context, camera_offset=(0, 0)):
         for particle in self.particles:

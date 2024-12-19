@@ -1,3 +1,4 @@
+from Objects.Physics.ObjectPhysics import ObjectPhysics
 from ..Colliders.AABBCollider import AABBCollider
 from ..Colliders.CircleCollider import CircleCollider
 from ..Core.Renderable import Renderable
@@ -5,7 +6,7 @@ from ..Core.Renderable import Renderable
 class Entity(Renderable):
     def __init__(self, x=0, y=0, width=0, height=0, physics=None, collider=None):
         super().__init__(x, y, width, height)
-        self.physics = physics
+        self.physics: 'ObjectPhysics' = physics
         self.collider = collider
         if self.collider:
             self.update_collider()

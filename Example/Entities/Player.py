@@ -1,3 +1,4 @@
+from Objects.Core.RenderContext import RenderContext
 from Objects.Entities.Entity import Entity
 from Objects.Colliders.AABBCollider import AABBCollider
 from Objects.Physics.StandardPhysics import StandardPhysics
@@ -15,7 +16,7 @@ class Player(Entity):
         self.outline_color = (0, 0, 0)
         self.outline_offset = 0
 
-    def render(self, ctx, camera_offset=(0, 0)):
+    def render(self, ctx: RenderContext, camera_offset=(0, 0)):
         adjusted_x = self.x - camera_offset[0]
         adjusted_y = self.y - camera_offset[1]
         ctx.draw_rounded_rect(adjusted_x, adjusted_y, self.width, self.height, self.color, 8)
@@ -27,6 +28,11 @@ class Player(Entity):
                 self.outline_color, 8,
                 filled=False
             )
+        
+        ctx.draw_circle(adjusted_x + self.width * 0.3, adjusted_y + self.height * 0.3, 8, (255, 255, 255))
+        ctx.draw_circle(adjusted_x + self.width * 0.3, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+        ctx.draw_circle(adjusted_x + self.width * 0.7, adjusted_y + self.height * 0.3, 8, (255, 255, 255))
+        ctx.draw_circle(adjusted_x + self.width * 0.7, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
 
     def update(self, delta_time):
         self.controller.handle_input(delta_time)
@@ -40,41 +46,3 @@ class Player(Entity):
         self.y = platform.y - self.height  # Colocar al jugador encima de la plataforma
 
 
-
-"""
-
-from Objects.Entities.Entity import Entity
-from Objects.Colliders.AABBCollider import AABBCollider
-from Objects.Physics.StandardPhysics import StandardPhysics
-from Objects.Controllers.EntityControllers.PlayerController import PlayerController
-
-class Player(Entity):
-    def __init__(self, x, y, width, height, scene=None, color = (0, 255, 0)):
-        physics = StandardPhysics(gravity=980, friction=0)
-        collider = AABBCollider(x, y, width, height)
-        super().__init__(x, y, width, height, physics=physics, collider=collider)
-        self.scene = scene
-        self.game = scene.game if scene else None
-        self.controller = PlayerController(self)
-        self.color = color
-        self.outline_color = None
-
-    def render(self, ctx, camera_offset=(0, 0)):
-        adjusted_x = self.x - camera_offset[0]
-        adjusted_y = self.y - camera_offset[1]
-        ctx.draw_rect(adjusted_x, adjusted_y, self.width, self.height, self.color)ç
-
-        if self.outline_color:
-            ctx.draw_rect(
-                adjusted_x-2, adjusted_y-2, 
-                self.width+4, self.height+4, 
-                self.outline_color,
-                filled=False
-            )
-
-    def update(self, delta_time):
-        self.controller.handle_input(delta_time)
-        super().update(delta_time)
-
-
-"""

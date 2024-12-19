@@ -3,6 +3,7 @@ import pygame
 from Objects import Scene, Camera
 from Objects.UI import Button, Panel, UIManager, Label
 from Example.Entities.Player import Player
+from Example.Entities.Enemy import Enemy
 from Example.Entities.Platform import Platform
 from Objects.Core import Game
 from Objects.Core.RenderContext import RenderContext
@@ -43,6 +44,9 @@ class GameScene(Scene):
 
     def setup_entities(self) -> None:
         self.player = Player(100, 100, 50, 50, scene=self)
+        self.enemies = [
+            Enemy(random.randint(200, 1800), 100, random.randint(15, 50), random.randint(15, 50)) for _ in range(5)
+        ]
         self.setup_platforms()
 
     def setup_platforms(self) -> None:
@@ -69,8 +73,8 @@ class GameScene(Scene):
     def setup_pause_menu(self) -> None:
         self.pause_panel = Panel(
             self.game.config.window_width/2 - 150,
-            self.game.config.window_height/2 - 200,
-            300, 400,
+            self.game.config.window_height/2 - 235,
+            300, 470,
             color=(40, 40, 40, 200)
         )
         
@@ -80,11 +84,14 @@ class GameScene(Scene):
                             normal_color=(100, 100, 150), hover_color=(120, 120, 170), pressed_color=(80, 80, 130)
                     )
         restart_btn = Button(50, 170, 200, 50, "Restart", self.restart_game)
-        quit_btn = Button(50, 240, 200, 50, "Quit", self.game.quit, 
+
+        btmmenu_btn = Button(50, 240, 200, 50, "Back to main menu", self.back_to_main_menu)
+
+        quit_btn = Button(50, 310, 200, 50, "Quit", self.game.quit, 
                           normal_color=(150, 100, 100), hover_color=(170, 120, 120), pressed_color=(130, 80, 80)
                     )
         debug_btn = Button(
-            50, 310, 200, 50,
+            50, 380, 200, 50,
             "Debug Info",
             lambda: setattr(self.debug_info, 'visible', not self.debug_info.visible),
             normal_color=(50, 50, 50), hover_color=(70, 70, 70), pressed_color=(30, 30, 30)
@@ -93,6 +100,7 @@ class GameScene(Scene):
         self.pause_panel.add_child(text_label)
         self.pause_panel.add_child(resume_btn)
         self.pause_panel.add_child(restart_btn)
+        self.pause_panel.add_child(btmmenu_btn)
         self.pause_panel.add_child(quit_btn)
         self.pause_panel.add_child(debug_btn)
         self.pause_panel.visible = False
@@ -119,6 +127,10 @@ class GameScene(Scene):
         self.player.physics.vx = 0
         self.player.physics.vy = 0
         self.toggle_pause()
+    
+    def back_to_main_menu(self) -> None:
+        from Example.Scenes import MainMenuScene
+        self.game.set_scene(MainMenuScene(self.game))
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -135,6 +147,29 @@ class GameScene(Scene):
     def fixed_update(self, fixed_delta: float) -> None:
         if not self.paused:
             self.player.update(fixed_delta)
+
+            if abs(self.player.physics.vx) < 10 and abs(self.player.physics.vy) < 10: self.particle_system.enabled = False
+            else: self.particle_system.enabled = True
+
+            if abs(self.player.physics.vx) >= 200:
+                self.particle_system.max_particles = 100
+                self.particle_system.spawn_rate = 50
+            elif abs(self.player.physics.vx) > 150:
+                self.particle_system.max_particles = 40
+                self.particle_system.spawn_rate = 20
+            elif abs(self.player.physics.vx) > 80:
+                self.particle_system.max_particles = 30
+                self.particle_system.spawn_rate = 15
+            elif abs(self.player.physics.vx) > 30:
+                self.particle_system.max_particles = 20
+                self.particle_system.spawn_rate = 10
+
+            print(f"Enabled particle: {self.particle_system.enabled}\nMAX PARTICLES: {self.particle_system.max_particles}\nRate: {self.particle_system.spawn_rate}")
+
+            for enemy in self.enemies:
+                enemy.update(fixed_delta)
+                if enemy.behaviour.objetive == None:
+                    enemy.behaviour.set_objetive(self.player)
             
             for platform in self.platforms:
                 if self.player.collides_with(platform):
@@ -167,6 +202,8 @@ class GameScene(Scene):
 
         for platform in self.platforms:
             platform.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
+        for enemy in self.enemies:
+            enemy.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
         self.particle_system.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
         self.player.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
         
@@ -176,3 +213,4 @@ class GameScene(Scene):
         # Pausa panel
         if self.paused:
             self.pause_panel.render(render_context)
+
