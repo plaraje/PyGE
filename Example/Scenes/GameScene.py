@@ -31,6 +31,22 @@ class GameScene(Scene):
             )
         )
 
+        self.land_particle_system = ParticleSystem(
+            max_particles=10000,
+            spawn_rate=5000,
+            particle_properties=lambda: ParticleProperties(
+                position=(self.player.x + (self.player.width/2), self.player.y + (self.player.height)),
+                velocity=(random.uniform(-175, 175), random.uniform(-175, 15)),
+                acceleration=(0, 5),
+                color=(random.randint(175, 240),) *3,
+                size=random.uniform(1, 3),
+                lifetime=random.uniform(0.2, 0.5)
+            )
+        )
+
+        self.land_particle_system.enabled = False
+
+
     def setup_world(self) -> None:
         self.world_bounds: Tuple[int, int, int, int] = (0, 0, 2000, 1500)
 
@@ -143,6 +159,7 @@ class GameScene(Scene):
         if not self.paused:
             self.camera.update(delta_time)
             self.particle_system.update(delta_time)
+            self.land_particle_system.update(delta_time)
 
     def fixed_update(self, fixed_delta: float) -> None:
         if not self.paused:
@@ -151,7 +168,7 @@ class GameScene(Scene):
             if abs(self.player.physics.vx) < 10 and abs(self.player.physics.vy) < 10: self.particle_system.enabled = False
             else: self.particle_system.enabled = True
 
-            if abs(self.player.physics.vx) >= 200:
+            """if abs(self.player.physics.vx) >= 200:
                 self.particle_system.max_particles = 100
                 self.particle_system.spawn_rate = 50
             elif abs(self.player.physics.vx) > 150:
@@ -162,7 +179,10 @@ class GameScene(Scene):
                 self.particle_system.spawn_rate = 15
             elif abs(self.player.physics.vx) > 30:
                 self.particle_system.max_particles = 20
-                self.particle_system.spawn_rate = 10
+                self.particle_system.spawn_rate = 10"""
+            
+            self.particle_system.max_particles = abs(self.player.physics.vx / 2 +1)
+            self.particle_system.spawn_rate = abs(self.player.physics.vx / 4 +1)
 
             print(f"Enabled particle: {self.particle_system.enabled}\nMAX PARTICLES: {self.particle_system.max_particles}\nRate: {self.particle_system.spawn_rate}")
 
@@ -174,6 +194,26 @@ class GameScene(Scene):
             for platform in self.platforms:
                 if self.player.collides_with(platform):
                     self.player.physics.on_collision(self.player, platform)
+
+            if (not self.player.previous_physics.is_grounded) and (self.player.physics.is_grounded) and self.player.previous_physics.vy > 30:
+                max_speed = 175 * self.player.previous_physics.vy / 300
+                x_dir_mod  =  self.player.previous_physics.vx / 300
+                txv = -max(max_speed * x_dir_mod, 175)
+                self.land_particle_system = ParticleSystem(
+                    max_particles=10000,
+                    spawn_rate=5000,
+                    particle_properties=lambda: ParticleProperties(
+                        position=(self.player.x + (self.player.width/2), self.player.y + (self.player.height)),
+                        velocity=(random.uniform(-txv, txv), random.uniform(-max_speed, 15)),
+                        acceleration=(0, 5),
+                        color=(random.randint(175, 240),) *3,
+                        size=random.uniform(1, 3),
+                        lifetime=random.uniform(0.2, self.player.previous_physics.vy / 300)
+                    )
+                )
+                self.land_particle_system.enabled = True
+            else:
+                self.land_particle_system.enabled = False
 
     def render(self, render_context: 'RenderContext') -> None:
         render_context.clear()
@@ -206,6 +246,7 @@ class GameScene(Scene):
             enemy.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
         self.particle_system.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
         self.player.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
+        self.land_particle_system.render(render_context, camera_offset=(self.camera.viewport.x, self.camera.viewport.y))
         
         # UI
         self.debug_info.render(render_context)

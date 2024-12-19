@@ -15,6 +15,7 @@ class Player(Entity):
         self.color = color
         self.outline_color = (0, 0, 0)
         self.outline_offset = 0
+        self.previous_physics = physics
 
     def render(self, ctx: RenderContext, camera_offset=(0, 0)):
         adjusted_x = self.x - camera_offset[0]
@@ -30,11 +31,27 @@ class Player(Entity):
             )
         
         ctx.draw_circle(adjusted_x + self.width * 0.3, adjusted_y + self.height * 0.3, 8, (255, 255, 255))
-        ctx.draw_circle(adjusted_x + self.width * 0.3, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
         ctx.draw_circle(adjusted_x + self.width * 0.7, adjusted_y + self.height * 0.3, 8, (255, 255, 255))
-        ctx.draw_circle(adjusted_x + self.width * 0.7, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+        if self.physics.vx > 10:
+            ctx.draw_circle(adjusted_x + 3 + self.width * 0.3, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+            ctx.draw_circle(adjusted_x + 3 + self.width * 0.7, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+        elif self.physics.vx < -10:
+            ctx.draw_circle(adjusted_x - 3 + self.width * 0.3, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+            ctx.draw_circle(adjusted_x - 3 + self.width * 0.7, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+        else:
+            ctx.draw_circle(adjusted_x + self.width * 0.3, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+            ctx.draw_circle(adjusted_x + self.width * 0.7, adjusted_y + self.height * 0.3, 3, (0, 0, 0))
+        
+        if self.physics.is_grounded:
+            ctx.draw_line((adjusted_x + self.width * 0.3, adjusted_y + self.height * 0.8),
+                          (adjusted_x + self.width * 0.7, adjusted_y + self.height * 0.8),
+                          (255, 0, 0), 3)
+        else:
+            ctx.draw_circle(adjusted_x + self.width * 0.5, adjusted_y + self.height * 0.8, 5, (255, 0, 0))
+            ctx.draw_circle(adjusted_x + self.width * 0.5, adjusted_y + self.height * 0.8, 2, (0, 255, 0))
 
     def update(self, delta_time):
+        self.previous_physics = self.physics.copy()
         self.controller.handle_input(delta_time)
         super().update(delta_time)
         print(f"Player position: ({self.x}, {self.y})")

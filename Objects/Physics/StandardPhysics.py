@@ -1,5 +1,6 @@
 import pygame
 from .ObjectPhysics import ObjectPhysics
+import copy
 
 class StandardPhysics(ObjectPhysics):
     def __init__(self, gravity=9.8, friction=0.2, bounce=0.5, gravity_modifier=1.0):
@@ -96,4 +97,7 @@ class StandardPhysics(ObjectPhysics):
                 return
 
         self.is_grounded = False
+
+    def copy(self):
+        return copy.deepcopy(self)
 

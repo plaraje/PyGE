@@ -1,0 +1,12 @@
+{
+    "folder-color.pathColors": [
+        {
+            "folderPath": "pgame\\Objects\\",
+            "badge": "OB"
+        },
+        {
+            "folderPath": "pgame\\Example\\",
+            "badge": "EX"
+        }
+    ]
+}

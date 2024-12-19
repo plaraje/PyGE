@@ -84,6 +84,30 @@ class RenderContext:
         pygame.draw.rect(surface, color, (0, 0, width, height))
         self.screen.blit(surface, (x, y))
 
+    def draw_line(self, start_pos, end_pos, color, width=1):
+        pygame.draw.line(self.screen, color, start_pos, end_pos, width)
+
+    def draw_arc(self, rect, start_angle, end_angle, color, width=1):
+        pygame.draw.arc(self.screen, color, rect, start_angle, end_angle, width)
+
+    def draw_ellipse(self, x, y, width, height, color, filled=True):
+        rect = pygame.Rect(x, y, width, height)
+        if filled:
+            pygame.draw.ellipse(self.screen, color, rect)
+        else:
+            pygame.draw.ellipse(self.screen, color, rect, 2)
+
+    def draw_polygon(self, points, color, filled=True):
+        if filled:
+            pygame.draw.polygon(self.screen, color, points)
+        else:
+            pygame.draw.polygon(self.screen, color, points, 2)
+
+    def draw_path(self, points, color, width=1, closed=False):
+        if closed:
+            points.append(points[0])
+        pygame.draw.lines(self.screen, color, closed, points, width)
+
     def draw_circle(self, x, y, radius, color, camera_offset=(0, 0)):
         adjusted_x = x - camera_offset[0]
         adjusted_y = y - camera_offset[1]
