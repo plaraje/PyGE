@@ -65,6 +65,6 @@ Contributions are welcome! Please follow these steps:
 
 
 ## Screenshots
-![image](/Screenshots/MainMenu.png)
-![image](https://github.com/user-attachments/assets/1a60f41a-db99-4d3f-893a-b3930c71a670)
-![image](https://github.com/user-attachments/assets/7a680d7e-5fed-4c7c-9bc3-fb28564ed492)
+![main menu](/Screenshots/MainMenu.png)
+![game](/Screenshots/Gameplay.png)
+![pause](/Screenshots/PauseMenu.png)
